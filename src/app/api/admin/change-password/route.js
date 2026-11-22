@@ -4,7 +4,7 @@ import { parseSession, COOKIE_NAME } from '@/lib/auth'
 import { findUserById, verifyPassword, updateUser } from '@/lib/db/adminUsers'
 
 export async function POST(request) {
-  const cookieStore = cookies()
+  const cookieStore = (await cookies())
   const session = await parseSession(cookieStore.get(COOKIE_NAME)?.value)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

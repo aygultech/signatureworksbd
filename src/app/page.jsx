@@ -15,7 +15,8 @@ import TestimonialsSection from '@/features/home/components/TestimonialsSection'
 import BlogSection from '@/features/home/components/BlogSection'
 import ContactSection from '@/features/home/components/ContactSection'
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 export default async function HomePage() {
   const { heroSlides, services, testimonials, stats, process, whyUs, about, editorial } = await getHomeContent()

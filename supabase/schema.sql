@@ -86,98 +86,62 @@ alter table portfolio_projects enable row level security;
 alter table blog_posts enable row level security;
 alter table site_settings enable row level security;
 
+insert into storage.buckets (id, name, public)
+values ('site-media', 'site-media', true)
+on conflict (id) do nothing;
+
+-- Anon key: insert-only for forms, read-only for public content.
+-- Admin access goes through server API routes using the service_role key.
+-- ---------- Public form submissions (insert only, with basic size limits) ----------
 drop policy if exists "Public insert contacts" on contact_submissions;
 create policy "Public insert contacts"
 on contact_submissions for insert
 to anon, authenticated
-with check (true);
-
-drop policy if exists "Public read contacts" on contact_submissions;
-create policy "Public read contacts"
-on contact_submissions for select
-to anon, authenticated
-using (true);
-
-drop policy if exists "Public delete contacts" on contact_submissions;
-create policy "Public delete contacts"
-on contact_submissions for delete
-to anon, authenticated
-using (true);
+with check (
+  length(name) between 1 and 200
+  and length(phone) between 3 and 40
+  and coalesce(length(email), 0) <= 200
+  and coalesce(length(message), 0) <= 5000
+);
 
 drop policy if exists "Public insert bookings" on bookings;
 create policy "Public insert bookings"
 on bookings for insert
 to anon, authenticated
-with check (true);
+with check (
+  status = 'pending'
+  and length(name) between 1 and 200
+  and length(phone) between 3 and 40
+  and coalesce(length(email), 0) <= 200
+  and coalesce(length(notes), 0) <= 5000
+);
 
-drop policy if exists "Public read bookings" on bookings;
-create policy "Public read bookings"
-on bookings for select
+-- ---------- Public read-only content ----------
+drop policy if exists "Public read portfolio" on portfolio_projects;
+create policy "Public read portfolio"
+on portfolio_projects for select
 to anon, authenticated
 using (true);
 
-drop policy if exists "Public update bookings" on bookings;
-create policy "Public update bookings"
-on bookings for update
+drop policy if exists "Public read published blog" on blog_posts;
+create policy "Public read published blog"
+on blog_posts for select
 to anon, authenticated
-using (true)
-with check (true);
+using (published = true);
 
-drop policy if exists "Public delete bookings" on bookings;
-create policy "Public delete bookings"
-on bookings for delete
+drop policy if exists "Public read site settings" on site_settings;
+create policy "Public read site settings"
+on site_settings for select
 to anon, authenticated
 using (true);
 
-drop policy if exists "Public manage portfolio" on portfolio_projects;
-create policy "Public manage portfolio"
-on portfolio_projects for all
-to anon, authenticated
-using (true)
-with check (true);
-
-drop policy if exists "Public manage blog" on blog_posts;
-create policy "Public manage blog"
-on blog_posts for all
-to anon, authenticated
-using (true)
-with check (true);
-
-drop policy if exists "Public manage site settings" on site_settings;
-create policy "Public manage site settings"
-on site_settings for all
-to anon, authenticated
-using (true)
-with check (true);
-
-insert into storage.buckets (id, name, public)
-values ('site-media', 'site-media', true)
-on conflict (id) do nothing;
-
+-- Public media stays readable (bucket is public). Writes now require a server-issued signed upload URL.
 drop policy if exists "Public read site media" on storage.objects;
 create policy "Public read site media"
 on storage.objects for select
 to anon, authenticated
 using (bucket_id = 'site-media');
 
-drop policy if exists "Public upload site media" on storage.objects;
-create policy "Public upload site media"
-on storage.objects for insert
-to anon, authenticated
-with check (bucket_id = 'site-media');
-
-drop policy if exists "Public update site media" on storage.objects;
-create policy "Public update site media"
-on storage.objects for update
-to anon, authenticated
-using (bucket_id = 'site-media')
-with check (bucket_id = 'site-media');
-
-drop policy if exists "Public delete site media" on storage.objects;
-create policy "Public delete site media"
-on storage.objects for delete
-to anon, authenticated
-using (bucket_id = 'site-media');
 
 create index if not exists idx_contact_submissions_submitted_at on contact_submissions (submitted_at desc);
 create index if not exists idx_bookings_submitted_at on bookings (submitted_at desc);
@@ -217,3 +181,45 @@ alter table admin_password_resets enable row level security;
 create index if not exists idx_admin_users_email on admin_users (email);
 create index if not exists idx_admin_password_resets_token on admin_password_resets (token);
 create index if not exists idx_admin_password_resets_email on admin_password_resets (email);
+
+-- ---------- Rate limiting for login / password reset ----------
+create table if not exists admin_auth_attempts (
+  key text primary key,
+  count integer not null default 0,
+  window_start timestamptz not null default now()
+);
+alter table admin_auth_attempts enable row level security;
+-- No policies: only the service_role key (server) can touch this table.
+
+create or replace function admin_auth_hit(p_key text, p_limit integer, p_window_seconds integer)
+returns table (allowed boolean, retry_after integer)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  rec admin_auth_attempts%rowtype;
+begin
+  insert into admin_auth_attempts as a (key, count, window_start)
+  values (p_key, 1, now())
+  on conflict (key) do update
+    set count = case
+                  when a.window_start < now() - make_interval(secs => p_window_seconds) then 1
+                  else a.count + 1
+                end,
+        window_start = case
+                  when a.window_start < now() - make_interval(secs => p_window_seconds) then now()
+                  else a.window_start
+                end
+  returning * into rec;
+
+  allowed := rec.count <= p_limit;
+  retry_after := greatest(0, ceil(extract(epoch from (rec.window_start + make_interval(secs => p_window_seconds) - now())))::integer);
+  return next;
+end;
+$$;
+
+revoke all on function admin_auth_hit(text, integer, integer) from public, anon, authenticated;
+grant execute on function admin_auth_hit(text, integer, integer) to service_role;
+
+create index if not exists idx_admin_auth_attempts_window on admin_auth_attempts (window_start);

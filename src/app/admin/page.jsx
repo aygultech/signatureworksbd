@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { adminDb as supabase } from '@/lib/adminDb'
 
 const CARDS = [
   { label: 'Total Contacts', table: 'contact_submissions', href: '/admin/contacts', color: 'text-blue-600', bg: 'bg-blue-50', icon: (

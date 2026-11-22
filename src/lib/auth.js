@@ -13,7 +13,11 @@ function b64urlDecode(str) {
 }
 
 async function getKey() {
-  const secret = process.env.ADMIN_SECRET || 'fallback_secret_change_this'
+  const secret = process.env.ADMIN_SECRET
+  // No fallback: a guessable default would let anyone forge an admin session.
+  if (!secret || secret.length < 32) {
+    throw new Error('ADMIN_SECRET must be set to a random string of at least 32 characters.')
+  }
   const keyData = enc.encode(secret)
   return crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify'])
 }
@@ -53,6 +57,7 @@ export async function createSession(user) {
     permissions: user.role === 'super_admin'
       ? { contacts: true, bookings: true, portfolio: true, blog: true, settings: true, media: true, users: true }
       : (user.permissions || {}),
+    exp: Date.now() + COOKIE_OPTIONS.maxAge * 1000,
   }
   const data = b64url(enc.encode(JSON.stringify(payload)))
   const key = await getKey()
@@ -70,7 +75,10 @@ export async function parseSession(token) {
     const key = await getKey()
     const valid = await crypto.subtle.verify('HMAC', key, b64urlDecode(sig), enc.encode(data))
     if (!valid) return null
-    return JSON.parse(dec.decode(b64urlDecode(data)))
+    const session = JSON.parse(dec.decode(b64urlDecode(data)))
+    // Tokens are self-contained, so expiry is enforced here, not only via cookie maxAge.
+    if (!session.exp || session.exp < Date.now()) return null
+    return session
   } catch {
     return null
   }

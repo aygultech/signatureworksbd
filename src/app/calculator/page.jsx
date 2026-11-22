@@ -9,7 +9,8 @@ export const metadata = {
   description: 'Estimate your construction or interior design project cost in Bangladesh. Get an instant ballpark figure based on project type, area, and quality grade.',
 }
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 export default async function CalculatorPage() {
   const pageContent = await getManagedPageContent('calculator')

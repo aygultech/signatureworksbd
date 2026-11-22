@@ -1,12 +1,18 @@
-import { createClient } from '@supabase/supabase-js'
+import 'server-only'
 import bcrypt from 'bcryptjs'
-import { randomBytes } from 'crypto'
+import { getServiceClient } from '@/lib/supabaseAdmin'
 
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) return null
-  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
+// Reset codes are stored hashed so a database leak cannot be used to take over accounts.
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+  return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// 12 chars from an unambiguous alphabet (~60 bits) — easy to type, infeasible to guess.
+function randomCode(length = 12) {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const bytes = crypto.getRandomValues(new Uint8Array(length))
+  return Array.from(bytes, b => alphabet[b % alphabet.length]).join('')
 }
 
 export async function findUserByEmail(email) {
@@ -79,11 +85,11 @@ export async function countUsers() {
 export async function createResetToken(email) {
   const sb = getServiceClient()
   if (!sb) throw new Error('Service client not available')
-  const token = randomBytes(4).toString('hex').toUpperCase()
+  const token = randomCode()
   await sb.from('admin_password_resets').delete().eq('email', email.toLowerCase())
   const { error } = await sb.from('admin_password_resets').insert([{
     email: email.toLowerCase(),
-    token,
+    token: await sha256Hex(token),
     expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
   }])
   if (error) throw new Error(error.message)
@@ -94,8 +100,8 @@ export async function verifyResetToken(email, token) {
   const sb = getServiceClient()
   if (!sb) return false
   const { data } = await sb.from('admin_password_resets')
-    .select('*').eq('email', email.toLowerCase()).eq('token', token).eq('used', false)
-    .gte('expires_at', new Date().toISOString()).single()
+    .select('*').eq('email', email.toLowerCase()).eq('token', await sha256Hex(String(token).trim().toUpperCase())).eq('used', false)
+    .gte('expires_at', new Date().toISOString()).maybeSingle()
   return data || null
 }
 

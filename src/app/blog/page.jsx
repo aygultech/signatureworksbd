@@ -10,7 +10,8 @@ export const metadata = {
   description: 'Expert articles on construction costs, interior design, materials, and project management in Bangladesh — from the team at Signature Works.',
 }
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 function formatDate(value) {
   if (!value) return ''

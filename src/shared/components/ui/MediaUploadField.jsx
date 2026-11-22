@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminDb as supabase } from '@/lib/adminDb'
 
 function getPreviewType(label = '', value = '') {
   const source = `${label} ${value}`.toLowerCase()

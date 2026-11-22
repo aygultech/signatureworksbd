@@ -4,7 +4,7 @@ import { parseSession, COOKIE_NAME } from '@/lib/auth'
 import { listUsers, createUser } from '@/lib/db/adminUsers'
 
 export async function GET() {
-  const cookieStore = cookies()
+  const cookieStore = (await cookies())
   const session = await parseSession(cookieStore.get(COOKIE_NAME)?.value)
   if (!session || session.role !== 'super_admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -14,7 +14,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const cookieStore = cookies()
+  const cookieStore = (await cookies())
   const session = await parseSession(cookieStore.get(COOKIE_NAME)?.value)
   if (!session || session.role !== 'super_admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

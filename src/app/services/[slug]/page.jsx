@@ -15,7 +15,8 @@ const icons = {
   renovation: RefreshCcw,
 }
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 function getEmbedUrl(url) {
   if (!url) return ''
@@ -33,7 +34,8 @@ export async function generateStaticParams() {
   return services.map((service) => ({ slug: service.slug }))
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+  const params = await props.params
   const { services } = await getServicesContent()
   const service = services.find((item) => item.slug === params.slug)
 
@@ -49,7 +51,8 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default async function ServiceDetailPage({ params }) {
+export default async function ServiceDetailPage(props) {
+  const params = await props.params
   const { services } = await getServicesContent()
   const service = services.find((item) => item.slug === params.slug)
 

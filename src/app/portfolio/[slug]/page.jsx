@@ -2,14 +2,16 @@ import { notFound } from 'next/navigation'
 import PortfolioDetailClient from '@/features/portfolio/components/PortfolioDetailClient'
 import { getPortfolioBySlug, getPortfolioProjects } from '@/lib/db/portfolio'
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 export async function generateStaticParams() {
   const projects = await getPortfolioProjects()
   return projects.map((project) => ({ slug: project.slug }))
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+  const params = await props.params
   const project = await getPortfolioBySlug(params.slug)
   if (!project) return {}
 
@@ -20,7 +22,8 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default async function PortfolioDetailPage({ params }) {
+export default async function PortfolioDetailPage(props) {
+  const params = await props.params
   const [project, projects] = await Promise.all([
     getPortfolioBySlug(params.slug),
     getPortfolioProjects(),

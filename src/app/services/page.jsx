@@ -9,7 +9,8 @@ export const metadata = {
   description: 'Explore the dedicated architectural design, construction, interior design, and renovation services offered by Signature Works.',
 }
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 const icons = {
   'architectural-design': Ruler,

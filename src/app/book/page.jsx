@@ -8,7 +8,8 @@ export const metadata = {
   description: 'Book a free 30-minute consultation with Signature Works. Choose a date and time that works for you.',
 }
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 export default async function BookPage() {
   const pageContent = await getManagedPageContent('book')

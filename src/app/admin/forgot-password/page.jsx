@@ -36,24 +36,14 @@ export default function ForgotPasswordPage() {
 
           {status === 'done' ? (
             <div className="space-y-5">
-              {result?.sent ? (
-                <div className="bg-green-900/30 border border-green-500/30 rounded-xl p-4 text-sm text-green-300">
-                  Reset token sent to your email. Use it within 1 hour.
-                </div>
-              ) : result?.token ? (
-                <div className="space-y-3">
-                  <div className="bg-amber-900/30 border border-amber-500/30 rounded-xl p-4 text-sm text-amber-300">
-                    Email not configured. Your reset token is shown below — copy it and use it on the reset page.
-                  </div>
-                  <div className="bg-slate-800 border border-white/10 rounded-xl p-4 text-center">
-                    <p className="text-slate-400 text-xs mb-1 uppercase tracking-widest">Reset Token</p>
-                    <p className="text-white font-mono text-2xl font-bold tracking-widest">{result.token}</p>
-                    <p className="text-slate-500 text-xs mt-1">Valid for 1 hour</p>
-                  </div>
+              {result?.ok ? (
+                <div className="bg-slate-800 border border-white/10 rounded-xl p-4 text-sm text-slate-300">
+                  If that email belongs to an admin account, a reset code has been sent to it. The code is valid for 1 hour.
+                  If nothing arrives, ask a super admin to reset your password from the Users page.
                 </div>
               ) : (
-                <div className="bg-slate-800 border border-white/10 rounded-xl p-4 text-sm text-slate-300">
-                  If that email belongs to an admin account, a reset token has been generated.
+                <div className="bg-red-900/30 border border-red-500/30 rounded-xl p-4 text-sm text-red-300">
+                  {result?.error || 'Something went wrong. Please try again.'}
                 </div>
               )}
               <Link href="/admin/reset-password" className="block w-full text-center py-3 rounded-xl bg-gradient-to-r from-navy-900 via-navy-700 to-gold-500 text-white font-semibold text-sm hover:shadow-lg transition-all">
