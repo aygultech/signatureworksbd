@@ -54,16 +54,23 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [session, setSession] = useState(() => getSession())
+  // Start empty so server and client render the same markup; the effect below fills it in.
+  const [session, setSession] = useState(null)
 
+  // The layout stays mounted across client navigations (including login -> dashboard),
+  // so re-read the session whenever the route changes instead of only on first mount.
   useEffect(() => {
-    if (session) return
-    // Existing sessions without info cookie: fetch from API and it'll set the cookie
+    if (['/admin/login', '/admin/forgot-password', '/admin/reset-password'].some(p => pathname.startsWith(p))) {
+      setSession(null)
+      return
+    }
+    const fromCookie = getSession()
+    if (fromCookie) { setSession(fromCookie); return }
     fetch('/api/admin/me')
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setSession(data) })
       .catch(() => {})
-  }, [session])
+  }, [pathname])
 
   const SKIP_LAYOUT = ['/admin/login', '/admin/forgot-password', '/admin/reset-password']
   if (SKIP_LAYOUT.some(p => pathname.startsWith(p))) return <>{children}</>
