@@ -9,7 +9,8 @@ export const metadata = {
   description: 'Explore 150+ architectural design, construction, and interior projects by Signature Works across Dhaka.',
 }
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 export default async function PortfolioPage() {
   const [pageContent, projects] = await Promise.all([

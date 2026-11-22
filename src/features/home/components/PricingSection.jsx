@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import Container from '@/shared/components/ui/Container'
 import SectionHeader from '@/shared/components/ui/SectionHeader'
@@ -86,10 +87,10 @@ export default function PricingSection() {
         <Reveal>
           <p className="text-center text-slate-400 dark:text-slate-500 text-sm mt-10">
             Need something custom?{' '}
-            <a href="/#contact" className="inline-flex items-center gap-1.5 text-gold-600 hover:text-gold-500 font-semibold hover:underline transition-colors">
+            <Link href="/#contact" className="inline-flex items-center gap-1.5 text-gold-600 hover:text-gold-500 font-semibold hover:underline transition-colors">
               <span>Get a Custom Quote</span>
               <ArrowRight className="h-4 w-4" />
-            </a>
+            </Link>
           </p>
         </Reveal>
       </Container>

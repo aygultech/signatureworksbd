@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { findUserByEmail, verifyResetToken, updateUser, markResetTokenUsed } from '@/lib/db/adminUsers'
+import { hitRateLimit, clientIp } from '@/lib/rateLimit'
 
 export async function POST(request) {
   const { email, token, newPassword } = await request.json()
@@ -8,6 +9,14 @@ export async function POST(request) {
   }
   if (newPassword.length < 8) {
     return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 })
+  }
+
+  const [ipLimit, emailLimit] = await Promise.all([
+    hitRateLimit(`reset:ip:${clientIp(request)}`, { limit: 20, windowSeconds: 60 * 60 }),
+    hitRateLimit(`reset:email:${String(email).toLowerCase()}`, { limit: 5, windowSeconds: 60 * 60 }),
+  ])
+  if (!ipLimit.allowed || !emailLimit.allowed) {
+    return NextResponse.json({ error: 'Too many attempts. Request a new code later.' }, { status: 429 })
   }
 
   const resetRecord = await verifyResetToken(email, token)

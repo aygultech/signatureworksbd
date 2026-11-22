@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminDb as supabase } from '@/lib/adminDb'
 
 const BUCKET = 'site-media'
 const FILE_TYPES = { all: 'All', image: 'Images', video: 'Videos', pdf: 'PDFs', other: 'Other' }

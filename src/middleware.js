@@ -19,20 +19,8 @@ export async function middleware(request) {
   if (!pathname.startsWith('/admin')) return NextResponse.next()
   if (PUBLIC_ADMIN_PATHS.some(p => pathname.startsWith(p))) return NextResponse.next()
 
-  const token = request.cookies.get(COOKIE_NAME)?.value
-  // Fallback: support old single-password cookie during transition
-  const legacyCookie = request.cookies.get('sw_admin_auth')?.value
-
-  const session = await parseSession(token)
-
-  if (!session) {
-    // Allow legacy cookie as fallback if service role key not yet configured
-    const adminPassword = process.env.ADMIN_PASSWORD?.trim()
-    if (legacyCookie && adminPassword && legacyCookie === adminPassword) {
-      return NextResponse.next()
-    }
-    return NextResponse.redirect(new URL('/admin/login', request.url))
-  }
+  const session = await parseSession(request.cookies.get(COOKIE_NAME)?.value)
+  if (!session) return NextResponse.redirect(new URL('/admin/login', request.url))
 
   // Dashboard, change-password always accessible when logged in
   if (pathname === '/admin' || pathname === '/admin/change-password') return NextResponse.next()

@@ -5,7 +5,8 @@ import Container from '@/shared/components/ui/Container'
 import BlogContent from '@/features/blog/components/BlogContent'
 import { getBlogBySlug, getBlogPosts } from '@/lib/db/blog'
 
-export const dynamic = 'force-dynamic'
+// Served from cache; refreshed hourly and immediately when an admin saves content.
+export const revalidate = 3600
 
 function formatDate(value, options = { day: 'numeric', month: 'long', year: 'numeric' }) {
   if (!value) return ''
@@ -19,7 +20,8 @@ export async function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug }))
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+  const params = await props.params
   const post = await getBlogBySlug(params.slug)
   if (!post) return {}
 
@@ -30,7 +32,8 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default async function BlogPostPage({ params }) {
+export default async function BlogPostPage(props) {
+  const params = await props.params
   const [post, posts] = await Promise.all([
     getBlogBySlug(params.slug),
     getBlogPosts(),

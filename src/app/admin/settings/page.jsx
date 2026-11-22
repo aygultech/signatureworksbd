@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminDb as supabase } from '@/lib/adminDb'
 import { PHONE_NUMBER, WHATSAPP_NUMBER, EMAIL, FACEBOOK_URL, WEBSITE_URL } from '@/shared/constants/constants'
 import { defaultNavLinks } from '@/lib/db/siteSettings'
 import { heroSlidesData } from '@/features/home/data/heroData'

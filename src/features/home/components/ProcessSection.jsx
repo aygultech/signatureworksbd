@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import Container from '@/shared/components/ui/Container'
 import SectionHeader from '@/shared/components/ui/SectionHeader'
 import Reveal from '@/shared/components/ui/Reveal'
@@ -86,7 +87,7 @@ export default function ProcessSection({ steps = processData }) {
         <Reveal>
           <div className="mt-16 text-center">
             <p className="text-slate-400 text-sm mb-4">Ready to start your project?</p>
-            <a
+            <Link
               href="/#contact"
               className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-gradient-to-r from-navy-900 via-navy-700 to-gold-500 text-white text-sm font-semibold hover:shadow-lg hover:shadow-gold-500/20 transition-all duration-300 hover:-translate-y-0.5"
             >
@@ -94,7 +95,7 @@ export default function ProcessSection({ steps = processData }) {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>
-            </a>
+            </Link>
           </div>
         </Reveal>
       </Container>

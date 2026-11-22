@@ -10,7 +10,7 @@ export const metadata = {
   },
   description:
     'Signature Works — Premium architectural design, construction, and interior design studio in Dhaka, Bangladesh. 150+ projects delivered. 8+ years of excellence.',
-  metadataBase: new URL('https://signatureworks.studio'),
+  metadataBase: new URL('https://signatureworks.com.bd'),
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
