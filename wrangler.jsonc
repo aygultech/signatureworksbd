@@ -1,6 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "signatureworksbd",
+  // Client Cloudflare account (Signatureworksbd). Pinned so deploys never go to a personal account.
+  "account_id": "91db861cf9a54e287c59674d23d7eb42",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -18,20 +20,20 @@
   //   npx wrangler d1 create signatureworksbd-tag-cache
   // then paste the returned ids below.
   "kv_namespaces": [
-    { "binding": "NEXT_INC_CACHE_KV", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }
+    { "binding": "NEXT_INC_CACHE_KV", "id": "729e32f87a9e4db9aebf02544e312b09" }
   ],
   "d1_databases": [
     {
       "binding": "NEXT_TAG_CACHE_D1",
       "database_name": "signatureworksbd-tag-cache",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "067f6551-26b3-4e34-956c-13830788b5c6"
     }
   ],
 
   // Public, non-secret values. Secrets are set with `npx wrangler secret put <NAME>`:
   //   SUPABASE_SERVICE_ROLE_KEY, ADMIN_SECRET, ADMIN_PASSWORD, EMAILJS_PRIVATE_KEY
   "vars": {
-    "NEXT_PUBLIC_SUPABASE_URL": "https://knlfouwcjeifrrqmxrig.supabase.co"
+    "NEXT_PUBLIC_SUPABASE_URL": "https://apszauqnmlvbomkrlsjn.supabase.co"
   },
 
   "observability": { "enabled": true }

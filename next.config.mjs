@@ -7,7 +7,7 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
-      { protocol: 'https', hostname: 'knlfouwcjeifrrqmxrig.supabase.co', pathname: '/storage/v1/object/public/**' },
+      { protocol: 'https', hostname: 'apszauqnmlvbomkrlsjn.supabase.co', pathname: '/storage/v1/object/public/**' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'res.cloudinary.com' },
     ],
@@ -39,4 +39,4 @@ const nextConfig = {
 export default nextConfig
 
 // Makes Cloudflare bindings available during `next dev`.
-initOpenNextCloudflareForDev()
+if (process.env.NODE_ENV === 'development') initOpenNextCloudflareForDev()
