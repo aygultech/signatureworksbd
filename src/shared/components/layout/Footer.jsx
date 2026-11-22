@@ -6,7 +6,7 @@ import { footerData } from '@/data'
 import useSiteContactSettings from '@/shared/hooks/useSiteContactSettings'
 
 export default function Footer() {
-  const { description, columns, copyright } = footerData
+  const { description, columns } = footerData
   const { phoneNumber, whatsappNumber, email, facebookUrl } = useSiteContactSettings()
 
   return (
@@ -119,11 +119,11 @@ export default function Footer() {
         <Container className="py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-slate-400 text-sm">
-              {copyright.replace('Signature Works', '')}{' '}
+              © {new Date().getFullYear()}{' '}
               <span className="font-semibold bg-gradient-to-r from-gold-400 to-navy-300 bg-clip-text text-transparent">
                 Signature Works
               </span>
-              {'. All rights reserved.'}
+              . All rights reserved.
             </p>
             <div className="flex items-center gap-5">
               <Link href="/portfolio" className="text-slate-500 text-xs hover:text-slate-300 transition-colors">Portfolio</Link>

@@ -43,8 +43,10 @@ function getSession() {
   try {
     const match = document.cookie.split('; ').find(c => c.startsWith('sw_admin_info='))
     if (!match) return null
-    const raw = match.slice('sw_admin_info='.length)
-    return JSON.parse(decodeURIComponent(raw))
+    let raw = match.slice('sw_admin_info='.length)
+    // Decode until it is JSON (older sessions carry a double-encoded value).
+    for (let i = 0; i < 3 && raw.startsWith('%'); i++) raw = decodeURIComponent(raw)
+    return JSON.parse(raw)
   } catch { return null }
 }
 

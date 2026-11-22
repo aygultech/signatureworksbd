@@ -154,7 +154,7 @@ export default function MediaPage() {
                       {copied === file.name ? 'Copied!' : 'Copy URL'}
                     </button>
                     <button onClick={() => handleDelete(file.name)} disabled={deleting === file.name} className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors disabled:opacity-50">
-                      {deleting === file.name ? '…' : 'Del'}
+                      {deleting === file.name ? '…' : 'Delete'}
                     </button>
                   </div>
                 </div>

@@ -40,14 +40,14 @@ export default async function HomePage() {
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200">
-                Signature design direction
+                Our approach
               </span>
               <h2 className="mt-5 max-w-2xl text-3xl font-black leading-tight text-white sm:text-4xl" style={{ textWrap: 'balance' }}>
-                <span className="block">A more original,</span>
-                <span className="block text-amber-200">studio-style layout for your brand.</span>
+                <span className="block">Every space designed</span>
+                <span className="block text-amber-200">around the people who use it.</span>
               </h2>
               <ExpandableText
-                text="This homepage is now arranged to feel more editorial and project-focused, so it stands apart instead of looking like another copied commercial layout."
+                text="We start with how you live and work, then shape layout, light and materials to match. The result is a space that feels personal, works hard every day, and stays within budget."
                 className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg"
               />
 
@@ -110,15 +110,15 @@ export default async function HomePage() {
           <div className="mb-8 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <span className="inline-flex rounded-full border border-gold-200 bg-gold-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-700 dark:border-gold-500/20 dark:bg-gold-500/10 dark:text-gold-300">
-                Designed to feel distinct
+                Who we work with
               </span>
               <h2 className="mt-4 text-3xl font-black text-slate-900 dark:text-white sm:text-4xl" style={{ textWrap: 'balance' }}>
-                <span className="block">Built around your work,</span>
-                <span className="block text-gold-600 dark:text-gold-300">not a generic clone.</span>
+                <span className="block">Homes, offices and renovations,</span>
+                <span className="block text-gold-600 dark:text-gold-300">handled end to end.</span>
               </h2>
             </div>
             <ExpandableText
-              text="The updated landing flow now puts project experience, service clarity, and transformation stories first so the brand feels more memorable and premium."
+              text="Whether you are building a family home, fitting out an office or upgrading an older property, one team takes you from first sketch to final handover."
               className="max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base"
             />
           </div>

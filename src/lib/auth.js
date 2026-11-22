@@ -45,7 +45,9 @@ export function makeInfoPayload(user) {
   const permissions = user.role === 'super_admin'
     ? { contacts: true, bookings: true, portfolio: true, blog: true, settings: true, media: true, users: true }
     : (user.permissions || {})
-  return encodeURIComponent(JSON.stringify({ name: user.name, role: user.role, permissions }))
+  // Next's cookie API URL-encodes values itself; encoding here too produced a double-encoded cookie
+  // the admin layout couldn't parse (sidebar rendered with only "Dashboard" until /api/admin/me answered).
+  return JSON.stringify({ name: user.name, role: user.role, permissions })
 }
 
 export async function createSession(user) {

@@ -168,9 +168,9 @@ export default function HeroSection({ slides = heroSlidesData }) {
                 <div className="grid gap-4 p-4 sm:grid-cols-[1.1fr_0.9fr]">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200">Studio snapshot</p>
-                    <h3 className="mt-2 text-xl font-bold text-white">Planned to feel bespoke, not borrowed.</h3>
+                    <h3 className="mt-2 text-xl font-bold text-white">Planned for you, built to last.</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-300">
-                      A cleaner split layout, editorial cards, and project-led storytelling make the homepage more original and brand-specific.
+                      Clear plans, honest budgets and careful site work, so the finished space matches what you were promised.
                     </p>
                   </div>
 
