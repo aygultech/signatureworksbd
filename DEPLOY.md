@@ -16,7 +16,7 @@ Then confirm under Advisors → Security that no table is flagged.
 ```bash
 npx wrangler login
 npx wrangler kv namespace create NEXT_INC_CACHE_KV      # paste id into wrangler.jsonc
-npx wrangler d1 create signatureworksbd-tag-cache       # paste database_id into wrangler.jsonc
+npx wrangler kv namespace create NEXT_TAG_CACHE_KV      # paste id into wrangler.jsonc
 ```
 
 ## 3. Secrets

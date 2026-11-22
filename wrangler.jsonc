@@ -17,17 +17,11 @@
 
   // Create once with:
   //   npx wrangler kv namespace create NEXT_INC_CACHE_KV
-  //   npx wrangler d1 create signatureworksbd-tag-cache
+  //   npx wrangler kv namespace create NEXT_TAG_CACHE_KV
   // then paste the returned ids below.
   "kv_namespaces": [
-    { "binding": "NEXT_INC_CACHE_KV", "id": "729e32f87a9e4db9aebf02544e312b09" }
-  ],
-  "d1_databases": [
-    {
-      "binding": "NEXT_TAG_CACHE_D1",
-      "database_name": "signatureworksbd-tag-cache",
-      "database_id": "067f6551-26b3-4e34-956c-13830788b5c6"
-    }
+    { "binding": "NEXT_INC_CACHE_KV", "id": "729e32f87a9e4db9aebf02544e312b09" },
+    { "binding": "NEXT_TAG_CACHE_KV", "id": "4ea802564aee4154a9fb4769427fce43" }
   ],
 
   // Public, non-secret values. Secrets are set with `npx wrangler secret put <NAME>`:
