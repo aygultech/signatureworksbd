@@ -36,5 +36,11 @@
     "NEXT_PUBLIC_SUPABASE_URL": "https://apszauqnmlvbomkrlsjn.supabase.co"
   },
 
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": [
+    { "pattern": "signatureworks.com.bd", "custom_domain": true },
+    { "pattern": "www.signatureworks.com.bd", "custom_domain": true }
+  ],
   "observability": { "enabled": true }
 }
