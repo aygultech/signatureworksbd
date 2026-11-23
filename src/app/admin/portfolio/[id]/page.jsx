@@ -157,6 +157,7 @@ export default function EditPortfolioPage() {
           </div>
           <div>
             <label className={labelCls}>Gallery Images</label>
+            <p className="mb-2 rounded-lg bg-sky-50 px-2.5 py-1.5 text-xs font-medium text-sky-800">📐 Recommended: 1600 × 1200px (4:3) · JPG/WebP, max 1 MB · upload in Media Library, then paste the link here</p>
             {gallery.map((url, i) => (
               <div key={i} className="flex gap-2 mb-2">
                 <input value={url} onChange={e => { const g = [...gallery]; g[i] = e.target.value; setGallery(g) }} className={inputCls} placeholder="https://..." />

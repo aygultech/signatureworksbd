@@ -335,6 +335,7 @@ function StructuredField({ label, value, path = [], onValueChange, onAddItem, on
           onChange={(nextValue) => onValueChange(path, nextValue)}
           placeholder="Paste URL or upload file"
           hint="You can paste a URL or click Upload File."
+          sizeContext={path.join(' ')}
           className={sharedCls}
         />
       </div>

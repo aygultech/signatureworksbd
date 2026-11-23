@@ -102,6 +102,7 @@ export default function NewBlogPage() {
             <label className={labelCls}>Cover Image *</label>
             <MediaUploadField
               label="Cover Image"
+              sizeContext="blog cover"
               value={form.cover_image}
               onChange={(nextValue) => set('cover_image', nextValue)}
               placeholder="Paste image URL or upload"

@@ -3,6 +3,18 @@ import { useState, useEffect, useRef } from 'react'
 import { adminDb as supabase } from '@/lib/adminDb'
 
 const BUCKET = 'site-media'
+const IMAGE_SIZE_TABLE = [
+  ['Homepage hero slide', '1920 × 1080', '16:9'],
+  ['Portfolio cover', '1600 × 1000', '16:10'],
+  ['Before / After', '1600 × 1200', '4:3 (both same)'],
+  ['Portfolio gallery', '1600 × 1200', '4:3'],
+  ['Blog cover', '1200 × 630', '1.91:1'],
+  ['Service card', '1200 × 800', '3:2'],
+  ['About section', '1200 × 900', '4:3'],
+  ['Team / testimonial photo', '400 × 400', '1:1 square'],
+  ['Logo', '640 × 150', 'transparent PNG'],
+]
+
 const FILE_TYPES = { all: 'All', image: 'Images', video: 'Videos', pdf: 'PDFs', other: 'Other' }
 
 function getFileType(name) {
@@ -97,6 +109,21 @@ export default function MediaPage() {
           <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleUpload} disabled={uploading} accept="image/*,video/*,.pdf,.doc,.docx" />
         </label>
       </div>
+
+      <details className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+        <summary className="cursor-pointer font-semibold">📐 Image size guide — কোন জায়গায় কোন size</summary>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead><tr className="text-sky-700"><th className="py-1 pr-4">Where</th><th className="py-1 pr-4">Size (px)</th><th className="py-1">Shape</th></tr></thead>
+            <tbody>
+              {IMAGE_SIZE_TABLE.map(([where, size, shape]) => (
+                <tr key={where} className="border-t border-sky-100"><td className="py-1 pr-4">{where}</td><td className="py-1 pr-4 font-mono">{size}</td><td className="py-1">{shape}</td></tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-sky-700">JPG বা WebP ব্যবহার করুন, প্রতিটা file 1 MB-এর কম রাখুন (squoosh.app দিয়ে compress করা যায়)।</p>
+        </div>
+      </details>
 
       {error && <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-sm text-rose-700">{error}</div>}
 

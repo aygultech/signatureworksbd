@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { adminDb as supabase } from '@/lib/adminDb'
+import { getImageSizeGuide, readImageDimensions, checkImageAgainstGuide } from '@/lib/imageSizeGuide'
 
 function getPreviewType(label = '', value = '') {
   const source = `${label} ${value}`.toLowerCase()
@@ -20,13 +21,16 @@ export default function MediaUploadField({
   hint,
   multiline = false,
   rows = 4,
+  sizeContext,
 }) {
   const fileInputRef = useRef(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const [warnings, setWarnings] = useState([])
 
   const previewType = getPreviewType(label, value || '')
   const accept = previewType === 'video' ? 'video/*' : 'image/*,video/*'
+  const sizeGuide = previewType === 'video' ? null : getImageSizeGuide(sizeContext || label)
 
   const handleUpload = async (event) => {
     const file = event.target.files?.[0]
@@ -39,6 +43,7 @@ export default function MediaUploadField({
 
     setUploading(true)
     setError('')
+    setWarnings(checkImageAgainstGuide(await readImageDimensions(file), sizeGuide, file.size))
 
     const extension = file.name.split('.').pop() || 'bin'
     const folder = file.type.startsWith('video/') ? 'videos' : 'images'
@@ -111,7 +116,11 @@ export default function MediaUploadField({
         </div>
       </div>
 
+      {sizeGuide && (
+        <p className="rounded-lg bg-sky-50 px-2.5 py-1.5 text-xs font-medium text-sky-800">📐 {sizeGuide.text}</p>
+      )}
       {hint && <p className="text-xs text-gray-400">{hint}</p>}
+      {warnings.map((w) => <p key={w} className="text-xs font-medium text-amber-700">⚠ {w}</p>)}
       {error && <p className="text-xs text-rose-600">{error}</p>}
 
       {value && previewType === 'image' && (
