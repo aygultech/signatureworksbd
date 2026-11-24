@@ -3,6 +3,7 @@ export const testimonialsData = [
     id: 1,
     name: 'Arif Hossain',
     role: 'Homeowner, Uttara',
+    photo: '',
     avatar: 'AH',
     rating: 5,
     review:
@@ -12,6 +13,7 @@ export const testimonialsData = [
     id: 2,
     name: 'Nadia Rahman',
     role: 'Business Owner, Gulshan',
+    photo: '',
     avatar: 'NR',
     rating: 5,
     review:
@@ -21,6 +23,7 @@ export const testimonialsData = [
     id: 3,
     name: 'Tanvir Ahmed',
     role: 'Property Developer, Bashundhara',
+    photo: '',
     avatar: 'TA',
     rating: 5,
     review:

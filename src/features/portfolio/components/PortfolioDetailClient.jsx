@@ -1,5 +1,6 @@
 'use client'
 import Image from 'next/image'
+import VideoPlayer from '@/shared/components/ui/VideoPlayer'
 import { useState } from 'react'
 import Link from 'next/link'
 import Container from '@/shared/components/ui/Container'
@@ -48,16 +49,6 @@ function GalleryLightbox({ images, initialIndex, onClose }) {
   )
 }
 
-function getEmbedUrl(url) {
-  if (!url) return ''
-  if (url.includes('youtube.com/watch?v=')) {
-    return `https://www.youtube.com/embed/${url.split('v=')[1].split('&')[0]}`
-  }
-  if (url.includes('youtu.be/')) {
-    return `https://www.youtube.com/embed/${url.split('youtu.be/')[1].split('?')[0]}`
-  }
-  return url
-}
 
 export default function PortfolioDetailClient({ project, prevProject, nextProject }) {
   const [lightbox, setLightbox] = useState(null)
@@ -145,13 +136,7 @@ export default function PortfolioDetailClient({ project, prevProject, nextProjec
               <div>
                 <h2 className="text-white text-xl font-bold font-serif mb-4">Project Video</h2>
                 <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-950 aspect-video">
-                  <iframe
-                    src={getEmbedUrl(videoUrl)}
-                    title={`${project.title} video`}
-                    className="h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                  <VideoPlayer src={videoUrl} title={`${project.title} video`} />
                 </div>
               </div>
             )}

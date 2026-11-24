@@ -27,12 +27,22 @@ export async function POST(request) {
 
   switch (body?.action) {
     case 'list': {
-      if (!canAccess(session, 'media')) return bad('Forbidden', 403)
-      const { data, error } = await bucket.list('', {
-        limit: 500,
+      // Editors need the list too, for the "Choose from Media Library" picker.
+      if (!canUpload(session)) return bad('Forbidden', 403)
+      // Form uploads used to land in images/ and videos/; the library shows every folder.
+      const folders = ['', 'images', 'videos']
+      const results = await Promise.all(folders.map(folder => bucket.list(folder, {
+        limit: 1000,
         sortBy: { column: 'created_at', order: 'desc' },
-      })
-      return NextResponse.json({ data, error: error ? { message: error.message } : null })
+      })))
+      const failed = results.find(r => r.error)
+      if (failed) return NextResponse.json({ data: null, error: { message: failed.error.message } })
+      const data = results
+        .flatMap((r, i) => (r.data || [])
+          .filter(f => f.id && f.name !== '.emptyFolderPlaceholder') // folders have no id
+          .map(f => ({ ...f, name: folders[i] ? `${folders[i]}/${f.name}` : f.name })))
+        .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+      return NextResponse.json({ data, error: null })
     }
     case 'remove': {
       if (!canAccess(session, 'media')) return bad('Forbidden', 403)

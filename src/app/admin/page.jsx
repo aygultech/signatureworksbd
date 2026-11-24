@@ -18,6 +18,17 @@ const CARDS = [
   )},
 ]
 
+const QUICK_ACTIONS = [
+  { emoji: '🏗️', title: 'নতুন project যোগ করুন', text: 'Portfolio-তে কাজের ছবি, before/after, video', href: '/admin/portfolio/new' },
+  { emoji: '✍️', title: 'নতুন blog post লিখুন', text: 'লেখা + cover ছবি — Blog page-এ দেখাবে', href: '/admin/blog/new' },
+  { emoji: '🖼️', title: 'Homepage-এর বড় slider বদলান', text: 'উপরের slide-এর ছবি, শিরোনাম, button', href: '/admin/settings?section=hero_slides_json' },
+  { emoji: '👥', title: 'About, Team আর ছবি', text: 'কোম্পানির গল্প, টিমের ছবি, ৪টা collage ছবি', href: '/admin/settings?section=about_home_json' },
+  { emoji: '⭐', title: 'Client review যোগ করুন', text: 'Testimonial — নাম, review, ছবি', href: '/admin/settings?section=testimonials_json' },
+  { emoji: '📞', title: 'ফোন / WhatsApp / Email', text: 'Call Now আর WhatsApp button এখান থেকে কাজ করে', href: '/admin/settings?section=contact' },
+  { emoji: '📁', title: 'Media Library', text: 'সব upload করা ছবি/video এক জায়গায়', href: '/admin/media' },
+  { emoji: '🌐', title: 'Website দেখুন', text: 'নতুন tab-এ live site খুলবে', href: '/', external: true },
+]
+
 export default function AdminDashboard() {
   const [counts, setCounts] = useState({})
   const [recentContacts, setRecentContacts] = useState([])
@@ -43,7 +54,7 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">Overview of your website content and inquiries</p>
+        <p className="text-gray-500 text-sm mt-1">নিচের shortcut থেকে সরাসরি কাজ শুরু করুন। প্রতিটা edit page-এ 📍 demo দেখানো আছে — কোন জিনিস site-এর কোথায় দেখাবে।</p>
       </div>
 
       {!supabase && (
@@ -51,6 +62,23 @@ export default function AdminDashboard() {
           <strong>Supabase not configured.</strong> Add <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to your .env.local file to enable all features.
         </div>
       )}
+
+      {/* Quick actions */}
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-gray-700">কী করতে চান?</h2>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {QUICK_ACTIONS.map(a => (
+            <Link key={a.href} href={a.href} target={a.external ? '_blank' : undefined}
+              className="group flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 transition hover:border-gold-300 hover:shadow-md">
+              <span className="text-2xl leading-none">{a.emoji}</span>
+              <span>
+                <span className="block text-sm font-semibold text-gray-900 group-hover:text-gold-700">{a.title}</span>
+                <span className="mt-0.5 block text-xs leading-5 text-gray-500">{a.text}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {/* Stat cards */}
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">

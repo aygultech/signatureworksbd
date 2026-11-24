@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { adminDb as supabase } from '@/lib/adminDb'
 import MediaUploadField from '@/shared/components/ui/MediaUploadField'
+import AdminGuide from '@/shared/components/admin/AdminGuide'
 
 function slugify(str) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -55,6 +56,13 @@ export default function NewBlogPage() {
       {error && <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl px-4 py-3 mb-5">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <AdminGuide
+          title="এই post site-এর কোথায় দেখাবে?"
+          where="Blog page-এ card হিসেবে (Cover Image + Title + Excerpt), homepage-এর Blog section-এও। Card-এ click করলে পুরো লেখা খোলে।"
+          demo="/admin-guide/blog-card.jpg"
+          view="/blog"
+          steps={['Excerpt = card-এ দেখানো ২–৩ লাইনের সারাংশ।', 'Cover Image = 1200×630 landscape ছবি।', 'Content-এ পুরো লেখা। নতুন অনুচ্ছেদের জন্য একটা খালি লাইন রাখুন; ## দিয়ে শুরু করলে উপশিরোনাম হয়।', '"Publish" টিক না দিলে draft থাকবে, site-এ দেখাবে না।']}
+        />
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
           <h2 className="font-semibold text-gray-900 text-sm border-b border-gray-100 pb-3">Post Details</h2>
           <div className="grid sm:grid-cols-2 gap-5">
@@ -105,7 +113,6 @@ export default function NewBlogPage() {
               sizeContext="blog cover"
               value={form.cover_image}
               onChange={(nextValue) => set('cover_image', nextValue)}
-              placeholder="Paste image URL or upload"
               required
               className={inputCls}
             />

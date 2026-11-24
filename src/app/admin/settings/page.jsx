@@ -13,20 +13,22 @@ import { aboutData } from '@/features/home/data/aboutData'
 import { servicePages } from '@/features/services/data/servicePages'
 import { managedPageDefaults } from '@/lib/db/siteSettings'
 import MediaUploadField from '@/shared/components/ui/MediaUploadField'
+import AdminGuide from '@/shared/components/admin/AdminGuide'
+import { SECTION_GUIDES, FIELD_HELP, HIDDEN_FIELDS } from './cmsGuide'
 
 const SETTINGS_KEYS = [
-  { key: 'phone_number',    label: 'Phone Number',    placeholder: PHONE_NUMBER,    hint: 'Shown in header, footer, and contact section' },
-  { key: 'whatsapp_number', label: 'WhatsApp Number', placeholder: WHATSAPP_NUMBER, hint: 'Without +, e.g. 8801712345678' },
-  { key: 'email',           label: 'Email Address',   placeholder: EMAIL,           hint: 'Shown in footer and contact section' },
-  { key: 'facebook_url',    label: 'Facebook URL',    placeholder: FACEBOOK_URL,    hint: 'Full URL including https://' },
-  { key: 'website_url',     label: 'Website URL',     placeholder: WEBSITE_URL,     hint: 'Your public domain' },
+  { key: 'phone_number',    label: 'Phone Number',    placeholder: PHONE_NUMBER,    hint: 'যেমন +8801712345678 — Call Now button আর header/footer-এ দেখাবে' },
+  { key: 'whatsapp_number', label: 'WhatsApp Number', placeholder: WHATSAPP_NUMBER, hint: '+ ছাড়া, দেশের কোডসহ: 8801712345678 — WhatsApp button এখানে যাবে' },
+  { key: 'email',           label: 'Email Address',   placeholder: EMAIL,           hint: 'Footer আর Contact section-এ দেখাবে' },
+  { key: 'facebook_url',    label: 'Facebook URL',    placeholder: FACEBOOK_URL,    hint: 'আপনার Facebook page-এর পুরো link (https://facebook.com/…)' },
+  { advanced: true, key: 'website_url',     label: 'Website URL',     placeholder: WEBSITE_URL,     hint: 'Your public domain' },
   { key: 'maps_embed_url',  label: 'Google Maps Embed URL', placeholder: 'https://www.google.com/maps/embed?pb=...', hint: 'Google Maps-এ গিয়ে Share → Embed a map → Copy HTML — এর src="" ভেতরের URL টা দিন' },
-  { key: 'ga_id',           label: 'Google Analytics ID',   placeholder: 'G-XXXXXXXXXX',  hint: 'Google Analytics 4 Measurement ID' },
-  { key: 'fb_pixel_id',     label: 'Facebook Pixel ID',     placeholder: '1234567890',     hint: 'Facebook Events Manager থেকে Pixel ID' },
-  { key: 'emailjs_service_id',           label: 'EmailJS Service ID',            placeholder: 'service_xxxxxxx', hint: 'EmailJS Dashboard → Email Services' },
-  { key: 'emailjs_public_key',           label: 'EmailJS Public Key',            placeholder: 'xxxxxxxxxxxxxx', hint: 'EmailJS Dashboard → Account → Public Key' },
-  { key: 'emailjs_contact_template_id',  label: 'EmailJS Contact Template ID',   placeholder: 'template_xxxxxxx', hint: 'Contact form-এর EmailJS template ID' },
-  { key: 'emailjs_booking_template_id',  label: 'EmailJS Booking Template ID',   placeholder: 'template_xxxxxxx', hint: 'Booking form-এর EmailJS template ID' },
+  { advanced: true, key: 'ga_id',           label: 'Google Analytics ID',   placeholder: 'G-XXXXXXXXXX',  hint: 'Google Analytics 4 Measurement ID' },
+  { advanced: true, key: 'fb_pixel_id',     label: 'Facebook Pixel ID',     placeholder: '1234567890',     hint: 'Facebook Events Manager থেকে Pixel ID' },
+  { advanced: true, key: 'emailjs_service_id',           label: 'EmailJS Service ID',            placeholder: 'service_xxxxxxx', hint: 'EmailJS Dashboard → Email Services' },
+  { advanced: true, key: 'emailjs_public_key',           label: 'EmailJS Public Key',            placeholder: 'xxxxxxxxxxxxxx', hint: 'EmailJS Dashboard → Account → Public Key' },
+  { advanced: true, key: 'emailjs_contact_template_id',  label: 'EmailJS Contact Template ID',   placeholder: 'template_xxxxxxx', hint: 'Contact form-এর EmailJS template ID' },
+  { advanced: true, key: 'emailjs_booking_template_id',  label: 'EmailJS Booking Template ID',   placeholder: 'template_xxxxxxx', hint: 'Booking form-এর EmailJS template ID' },
 ]
 
 const CONTENT_KEYS = [
@@ -185,10 +187,13 @@ function setAtPath(target, path, nextValue) {
   }
 }
 
-function addItemAtPath(target, path) {
+function addItemAtPath(target, path, defaults) {
   const collection = getAtPath(target, path)
   if (!Array.isArray(collection)) return target
-  const template = collection.length > 0 ? createEmptyValue(collection[0]) : ''
+  // Shape new items like the default content at the same place (array indices → first item).
+  const defaultCollection = getAtPath(defaults, path.map((key) => (typeof key === 'number' ? 0 : key)))
+  const sample = collection[0] ?? (Array.isArray(defaultCollection) ? defaultCollection[0] : undefined)
+  const template = sample !== undefined ? createEmptyValue(sample) : ''
   return setAtPath(target, path, [...collection, template])
 }
 
@@ -206,12 +211,33 @@ function isLongTextField(label, value) {
   )
 }
 
-function isUrlField(label) {
-  return /image|url|href|video/.test(String(label).toLowerCase())
+function isMediaField(label) {
+  const key = String(label).toLowerCase()
+  if (/alt$/.test(key)) return false
+  return /image|photo|video|logo|picture/.test(key)
+}
+
+// Adds keys that newer site versions support (e.g. photo, gallery, videoUrl) to content saved earlier,
+// so their fields appear in the form without wiping what the owner already wrote.
+function withTemplate(value, template) {
+  if (Array.isArray(value)) {
+    const itemTemplate = Array.isArray(template) && template.length ? template[0] : undefined
+    return value.map((item) => withTemplate(item, itemTemplate))
+  }
+  if (value && typeof value === 'object' && template && typeof template === 'object' && !Array.isArray(template)) {
+    const out = { ...value }
+    for (const [key, tv] of Object.entries(template)) {
+      out[key] = key in value ? withTemplate(value[key], tv) : JSON.parse(JSON.stringify(tv))
+    }
+    return out
+  }
+  return value
 }
 
 function StructuredField({ label, value, path = [], onValueChange, onAddItem, onRemoveItem, depth = 0 }) {
   const fieldLabel = formatFieldLabel(label)
+  const help = FIELD_HELP[label]
+  if (depth > 0 && HIDDEN_FIELDS.has(label)) return null
 
   if (Array.isArray(value)) {
     return (
@@ -307,6 +333,7 @@ function StructuredField({ label, value, path = [], onValueChange, onAddItem, on
           onChange={(e) => onValueChange(path, Number(e.target.value || 0))}
           className={sharedCls}
         />
+        {help && <p className="mt-1 text-xs text-slate-400">{help}</p>}
       </div>
     )
   }
@@ -321,11 +348,12 @@ function StructuredField({ label, value, path = [], onValueChange, onAddItem, on
           onChange={(e) => onValueChange(path, e.target.value)}
           className={sharedCls + ' resize-y min-h-[110px]'}
         />
+        {help && <p className="mt-1 text-xs text-slate-400">{help}</p>}
       </div>
     )
   }
 
-  if (isUrlField(label)) {
+  if (isMediaField(label)) {
     return (
       <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">{fieldLabel}</label>
@@ -333,10 +361,9 @@ function StructuredField({ label, value, path = [], onValueChange, onAddItem, on
           label={fieldLabel}
           value={value ?? ''}
           onChange={(nextValue) => onValueChange(path, nextValue)}
-          placeholder="Paste URL or upload file"
-          hint="You can paste a URL or click Upload File."
+          kind={/video/i.test(String(label)) ? 'video' : 'image'}
+          hint={help}
           sizeContext={path.join(' ')}
-          className={sharedCls}
         />
       </div>
     )
@@ -351,6 +378,7 @@ function StructuredField({ label, value, path = [], onValueChange, onAddItem, on
         onChange={(e) => onValueChange(path, e.target.value)}
         className={sharedCls}
       />
+      {help && <p className="mt-1 text-xs text-slate-400">{help}</p>}
     </div>
   )
 }
@@ -361,6 +389,15 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
   const [openSection, setOpenSection] = useState('hero_slides_json')
+
+  // Dashboard shortcuts link here with ?section=<key> to open (and scroll to) one part.
+  useEffect(() => {
+    const section = new URLSearchParams(window.location.search).get('section')
+    if (!section) return
+    if (section !== 'contact') setOpenSection(section)
+    const t = setTimeout(() => document.getElementById(`cms-${section}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 400)
+    return () => clearTimeout(t)
+  }, [])
 
   useEffect(() => {
     const defaults = Object.fromEntries([
@@ -384,7 +421,7 @@ export default function SettingsPage() {
   const updateStructuredContent = (key, defaultValue, updater) => {
     setValues((prev) => {
       const fallback = tryParseJson(defaultValue, {})
-      const currentValue = tryParseJson(prev[key] || defaultValue, fallback)
+      const currentValue = withTemplate(tryParseJson(prev[key] || defaultValue, fallback), fallback)
       const updatedValue = updater(currentValue)
 
       return {
@@ -433,8 +470,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-5xl space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Full Website CMS</h1>
-        <p className="text-gray-500 text-sm mt-1">Now form-based — content দিলে JSON automatically generate হয়ে save হবে</p>
+        <h1 className="text-2xl font-bold text-gray-900">Website Content (Full CMS)</h1>
+        <p className="text-gray-600 text-sm mt-1">Site-এর লেখা, ছবি, video আর button এখান থেকে বদলান। প্রতিটা অংশ খুললে <b>📍 demo ছবি</b> দেখবেন — site-এ ঠিক কোথায় দেখাবে। বদলানোর পর নিচের <b>Save All Changes</b> চাপুন; ১ মিনিটের মধ্যে site-এ live হবে।</p>
       </div>
 
       {!supabase && (
@@ -451,25 +488,14 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="font-semibold text-gray-900 text-sm border-b border-gray-100 pb-3 mb-5">Current Saved Values</h2>
-        <div className="space-y-2 text-sm">
-          {SETTINGS_KEYS.map((s) => (
-            <div key={s.key} className="flex items-start gap-3 py-2 border-b border-gray-50">
-              <span className="text-gray-500 w-48 shrink-0 text-xs font-medium pt-0.5">{s.label}</span>
-              <span className={`font-mono text-xs break-all ${values[s.key] ? 'text-gray-900' : 'text-gray-400'}`}>
-                {values[s.key] || s.placeholder}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {supabase && (
         <form onSubmit={handleSave} className="space-y-5">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
-            <h2 className="font-semibold text-gray-900 text-sm border-b border-gray-100 pb-3">Contact Settings</h2>
-            {SETTINGS_KEYS.map((s) => (
+          <div id="cms-contact" className="scroll-mt-4 bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+            <div className="border-b border-gray-100 pb-3">
+              <h2 className="font-semibold text-gray-900 text-sm">Contact Info (ফোন, WhatsApp, Email)</h2>
+              <p className="text-xs text-gray-500 mt-1">Header, footer, &ldquo;Call Now&rdquo; button, WhatsApp button আর Contact section — সব জায়গায় এখান থেকে যাবে।</p>
+            </div>
+            {SETTINGS_KEYS.filter((s) => !s.advanced).map((s) => (
               <div key={s.key}>
                 <label className={labelCls}>{s.label}</label>
                 <input
@@ -481,23 +507,40 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-400 mt-1">{s.hint}</p>
               </div>
             ))}
+            <details className="rounded-xl border border-slate-200 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-600">Advanced (Google Analytics, Facebook Pixel, EmailJS) — developer দিয়ে সেট করান</summary>
+              <div className="mt-4 space-y-5">
+                {SETTINGS_KEYS.filter((s) => s.advanced).map((s) => (
+              <div key={s.key}>
+                <label className={labelCls}>{s.label}</label>
+                <input
+                  value={values[s.key] || ''}
+                  onChange={(e) => setValues((prev) => ({ ...prev, [s.key]: e.target.value }))}
+                  className={inputCls}
+                  placeholder={s.placeholder}
+                />
+                <p className="text-xs text-gray-400 mt-1">{s.hint}</p>
+              </div>
+                ))}
+              </div>
+            </details>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
             <div className="border-b border-gray-100 pb-3">
-              <h2 className="font-semibold text-gray-900 text-sm">Full Website Content Manager</h2>
-              <p className="text-xs text-gray-400 mt-1">Text, image URL, video URL, button link — সব form input থেকে edit করুন. JSON auto create হবে.</p>
+              <h2 className="font-semibold text-gray-900 text-sm">Site-এর অংশগুলো</h2>
+              <p className="text-xs text-gray-500 mt-1">যে অংশ বদলাতে চান তাতে click করুন। ছবি/video শুধু Upload button দিয়ে দিন — link বসাতে হবে না।</p>
             </div>
 
             {CONTENT_KEYS.map((item) => {
               const rawValue = values[item.key] || item.defaultValue
               const fallback = tryParseJson(item.defaultValue, {})
-              const parsedValue = tryParseJson(rawValue, fallback)
+              const parsedValue = withTemplate(tryParseJson(rawValue, fallback), fallback)
               const hasValidJson = rawValue ? tryParseJson(rawValue, null) !== null : true
               const itemCount = Array.isArray(parsedValue) ? parsedValue.length : Object.keys(parsedValue || {}).length
 
               return (
-                <div key={item.key} className="rounded-2xl border border-slate-200 overflow-hidden">
+                <div key={item.key} id={`cms-${item.key}`} className="scroll-mt-4 rounded-2xl border border-slate-200 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setOpenSection((prev) => prev === item.key ? '' : item.key)}
@@ -505,19 +548,17 @@ export default function SettingsPage() {
                   >
                     <div>
                       <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                      <p className="text-xs text-slate-500 mt-1">{item.hint} Upload button use করলে URL auto fill হবে.</p>
+                      <p className="text-xs text-slate-500 mt-1">{SECTION_GUIDES[item.key]?.where || item.hint}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{itemCount} fields</span>
-                      <span className="text-slate-400 text-xs">{openSection === item.key ? 'Hide' : 'Edit'}</span>
+                      {Array.isArray(parsedValue) && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{itemCount} items</span>}
+                      <span className="rounded-lg bg-gold-50 px-2.5 py-1 text-xs font-semibold text-gold-700">{openSection === item.key ? 'বন্ধ করুন' : 'Edit করুন'}</span>
                     </div>
                   </button>
 
                   {openSection === item.key && (
                     <div className="border-t border-slate-200 p-4 space-y-4 bg-slate-50/40">
-                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
-                        Form mode active. এখানে content edit করলে JSON automatically generate হয়ে database এ save হবে.
-                      </div>
+                      {SECTION_GUIDES[item.key] && <AdminGuide {...SECTION_GUIDES[item.key]} defaultOpen />}
 
                       {hasValidJson ? (
                         <StructuredField
@@ -525,7 +566,7 @@ export default function SettingsPage() {
                           value={parsedValue}
                           path={[]}
                           onValueChange={(path, nextValue) => updateStructuredContent(item.key, item.defaultValue, (current) => setAtPath(current, path, nextValue))}
-                          onAddItem={(path) => updateStructuredContent(item.key, item.defaultValue, (current) => addItemAtPath(current, path))}
+                          onAddItem={(path) => updateStructuredContent(item.key, item.defaultValue, (current) => addItemAtPath(current, path, fallback))}
                           onRemoveItem={(path, index) => updateStructuredContent(item.key, item.defaultValue, (current) => removeItemAtPath(current, path, index))}
                         />
                       ) : (
@@ -543,7 +584,7 @@ export default function SettingsPage() {
                       )}
 
                       <details className="rounded-xl border border-slate-200 bg-white p-3">
-                        <summary className="cursor-pointer text-xs font-semibold text-slate-600">Advanced JSON Editor</summary>
+                        <summary className="cursor-pointer text-xs font-semibold text-slate-400">Developer only — raw JSON (বদলাবেন না)</summary>
                         <textarea
                           rows={10}
                           value={rawValue}
@@ -558,121 +599,17 @@ export default function SettingsPage() {
             })}
           </div>
 
-          <div className="flex items-center gap-4 pt-2">
+          <div className="sticky bottom-0 z-20 flex flex-wrap items-center gap-4 rounded-t-xl border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] backdrop-blur">
             <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-xl bg-navy-900 text-white font-semibold text-sm hover:bg-navy-800 transition-colors disabled:opacity-60">
-              {saving ? 'Saving…' : 'Save All Changes'}
+              {saving ? 'Saving…' : '💾 Save All Changes'}
             </button>
-            {saved && <span className="text-green-600 text-sm font-medium">Saved!</span>}
+            {saved && <span className="text-green-600 text-sm font-semibold">✓ Saved — site-এ live হয়ে গেছে</span>}
+            {error && <span className="text-rose-600 text-sm font-medium">{error}</span>}
+            {!saved && !error && <span className="text-xs text-gray-400">বদলানোর পর অবশ্যই Save চাপুন</span>}
           </div>
         </form>
       )}
 
-      <div className="bg-slate-900 rounded-xl p-5">
-        <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3">Supabase SQL — Run once in your project</p>
-        <pre className="text-green-400 text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap">{`-- Contact form submissions
-create table if not exists contact_submissions (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
-  phone text not null,
-  email text,
-  service text,
-  budget text,
-  message text,
-  submitted_at timestamptz default now()
-);
-
--- Bookings
-create table if not exists bookings (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
-  phone text not null,
-  email text,
-  date text,
-  time text,
-  meeting_type text,
-  notes text,
-  status text default 'pending',
-  submitted_at timestamptz default now()
-);
-
--- Portfolio projects
-create table if not exists portfolio_projects (
-  id uuid default gen_random_uuid() primary key,
-  slug text unique not null,
-  title text not null,
-  subtitle text,
-  category text,
-  location text,
-  year text,
-  image text,
-  gallery jsonb default '[]',
-  description text,
-  full_description text,
-  highlights jsonb default '[]',
-  client text,
-  area text,
-  duration text,
-  budget text,
-  team jsonb default '[]',
-  before_image text,
-  after_image text,
-  video_url text,
-  featured boolean default false,
-  order_index int default 0,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
--- Blog posts
-create table if not exists blog_posts (
-  id uuid default gen_random_uuid() primary key,
-  slug text unique not null,
-  title text not null,
-  excerpt text,
-  category text,
-  cover_image text,
-  content text,
-  author text default 'Signature Works',
-  published_at date default current_date,
-  read_time text,
-  tags jsonb default '[]',
-  published boolean default true,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
--- Site settings
-create table if not exists site_settings (
-  key text primary key,
-  value text,
-  updated_at timestamptz default now()
-);
-
--- Enable public read/write (adjust with RLS for production)
-alter table contact_submissions enable row level security;
-alter table bookings enable row level security;
-alter table portfolio_projects enable row level security;
-alter table blog_posts enable row level security;
-alter table site_settings enable row level security;
-
-create policy "Allow all" on contact_submissions for all using (true);
-create policy "Allow all" on bookings for all using (true);
-create policy "Allow all" on portfolio_projects for all using (true);
-create policy "Allow all" on blog_posts for all using (true);
-create policy "Allow all" on site_settings for all using (true);
-
--- Upgrade existing portfolio table if already created earlier
-alter table if exists portfolio_projects add column if not exists budget text;
-alter table if exists portfolio_projects add column if not exists team jsonb default '[]';
-alter table if exists portfolio_projects add column if not exists before_image text;
-alter table if exists portfolio_projects add column if not exists after_image text;
-alter table if exists portfolio_projects add column if not exists video_url text;
-
--- Storage bucket for image/video uploads
-insert into storage.buckets (id, name, public)
-values ('site-media', 'site-media', true)
-on conflict (id) do nothing;`}</pre>
-      </div>
     </div>
   )
 }

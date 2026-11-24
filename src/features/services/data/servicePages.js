@@ -7,6 +7,7 @@ export const servicePages = [
     accent: 'Design',
     image: '/images/stock/service-architectural.jpg',
     imageAlt: 'Architectural planning and concept development',
+    videoUrl: '',
     description:
       'Concept development, floor planning, 3D visualization, and permit-ready drawing support for homes, offices, and mixed-use spaces.',
     summary:
@@ -41,6 +42,7 @@ export const servicePages = [
     accent: 'Execution',
     image: '/images/stock/blog-construction-cost.jpg',
     imageAlt: 'Construction site and building execution',
+    videoUrl: '',
     description:
       'End-to-end residential and commercial construction handled with structured supervision, budget awareness, and milestone-based delivery.',
     summary:
@@ -75,6 +77,7 @@ export const servicePages = [
     accent: 'Design',
     image: '/images/stock/hero-interior.jpg',
     imageAlt: 'Interior design and styling concept',
+    videoUrl: '',
     description:
       'Space planning, furniture direction, color strategy, and fit-out concepts designed to make each room feel refined, functional, and personal.',
     summary:
@@ -109,6 +112,7 @@ export const servicePages = [
     accent: 'Upgrades',
     image: '/images/stock/service-renovation.jpg',
     imageAlt: 'Renovated modern interior space',
+    videoUrl: '',
     description:
       'Transform outdated homes and commercial interiors with better planning, cleaner detailing, and smarter material decisions without losing budget control.',
     summary:

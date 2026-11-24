@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { adminDb as supabase } from '@/lib/adminDb'
 import MediaUploadField from '@/shared/components/ui/MediaUploadField'
+import AdminGuide from '@/shared/components/admin/AdminGuide'
 
 function slugify(str) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -62,6 +63,13 @@ export default function NewPortfolioPage() {
       {error && <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl px-4 py-3 mb-5">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <AdminGuide
+          title="এই project site-এর কোথায় দেখাবে?"
+          where="Portfolio page-এ একটা card হিসেবে (Cover Image + Title + Location), আর card-এ click করলে project-এর নিজস্ব page খোলে — সেখানে Before/After slider, Video, Gallery আর বিবরণ দেখায়। Featured দিলে homepage-এও দেখাবে।"
+          demo="/admin-guide/portfolio-detail.jpg"
+          view="/portfolio"
+          steps={['Title আর Cover Image অবশ্যই দিন (* চিহ্ন দেওয়া)।', 'Before / After — একই জায়গার কাজের আগে ও পরের ছবি, একই size-এ। দুটো দিলে slider দেখাবে।', 'Gallery-তে কাজের আরো ছবি দিন।', 'শেষে নিচের Save button চাপুন।']}
+        />
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
           <h2 className="font-semibold text-gray-900 text-sm border-b border-gray-100 pb-3">Basic Info</h2>
 
@@ -134,9 +142,9 @@ export default function NewPortfolioPage() {
             <label className={labelCls}>Cover Image *</label>
             <MediaUploadField
               label="Cover Image"
+              hint="Portfolio card আর project page-এর উপরের বড় ছবি"
               value={form.image}
               onChange={(nextValue) => set('image', nextValue)}
-              placeholder="Paste image URL or upload"
               required
               className={inputCls}
             />
@@ -146,9 +154,9 @@ export default function NewPortfolioPage() {
               <label className={labelCls}>Before Image</label>
               <MediaUploadField
                 label="Before Image"
+                hint="কাজ শুরুর আগের ছবি"
                 value={form.before_image}
                 onChange={(nextValue) => set('before_image', nextValue)}
-                placeholder="Paste image URL or upload"
                 className={inputCls}
               />
             </div>
@@ -156,9 +164,9 @@ export default function NewPortfolioPage() {
               <label className={labelCls}>After Image</label>
               <MediaUploadField
                 label="After Image"
+                hint="কাজ শেষের ছবি — Before-এর মতো একই angle থেকে"
                 value={form.after_image}
                 onChange={(nextValue) => set('after_image', nextValue)}
-                placeholder="Paste image URL or upload"
                 className={inputCls}
               />
             </div>
@@ -166,23 +174,35 @@ export default function NewPortfolioPage() {
           <div>
             <label className={labelCls}>Video</label>
             <MediaUploadField
-              label="Video URL"
+              label="Project Video"
+              kind="video"
+              hint="ঐচ্ছিক — দিলে project page-এ video দেখাবে।"
               value={form.video_url}
               onChange={(nextValue) => set('video_url', nextValue)}
-              placeholder="Paste video URL or upload"
               className={inputCls}
             />
           </div>
           <div>
-            <label className={labelCls}>Gallery Images (URLs)</label>
-            <p className="mb-2 rounded-lg bg-sky-50 px-2.5 py-1.5 text-xs font-medium text-sky-800">📐 Recommended: 1600 × 1200px (4:3) · JPG/WebP, max 1 MB · upload in Media Library, then paste the link here</p>
-            {gallery.map((url, i) => (
-              <div key={i} className="flex gap-2 mb-2">
-                <input value={url} onChange={e => { const g = [...gallery]; g[i] = e.target.value; setGallery(g) }} className={inputCls} placeholder="https://..." />
-                <button type="button" onClick={() => setGallery(g => g.filter((_, j) => j !== i))} className="text-gold-500 hover:text-gold-700 px-2" aria-label="Remove image"><X className="h-4 w-4" /></button>
-              </div>
-            ))}
-            <button type="button" onClick={() => setGallery(g => [...g, ''])} className="text-sm text-blue-600 hover:text-blue-800 font-medium">+ Add Image</button>
+            <label className={labelCls}>Gallery Images</label>
+            <p className="mb-3 text-xs text-gray-500">Project page-এর নিচে ছবির grid-এ দেখাবে। যত খুশি ছবি যোগ করুন।</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {gallery.map((url, i) => (
+                <div key={i} className="relative rounded-xl border border-gray-100 p-2">
+                  <p className="mb-1 text-[11px] font-semibold text-gray-400">ছবি {i + 1}</p>
+                  <MediaUploadField
+                    label="Gallery Image"
+                    kind="image"
+                    sizeContext="gallery"
+                    value={url}
+                    onChange={(next) => setGallery(g => g.map((v, j) => (j === i ? next : v)))}
+                  />
+                  {gallery.length > 1 && (
+                    <button type="button" onClick={() => setGallery(g => g.filter((_, j) => j !== i))} className="absolute right-2 top-2 rounded-lg p-1 text-gray-400 hover:bg-rose-50 hover:text-rose-600" aria-label="এই ঘর বাদ দিন"><X className="h-4 w-4" /></button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={() => setGallery(g => [...g, ''])} className="mt-3 rounded-xl border border-gold-200 bg-gold-50 px-4 py-2 text-sm font-semibold text-gold-700 hover:bg-gold-100">+ আরেকটা ছবি</button>
           </div>
         </div>
 

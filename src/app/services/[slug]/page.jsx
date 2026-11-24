@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import VideoPlayer from '@/shared/components/ui/VideoPlayer'
 import { ArrowRight, BadgeCheck, Building2, RefreshCcw, Ruler, Sofa, Sparkles } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import Container from '@/shared/components/ui/Container'
@@ -18,16 +19,6 @@ const icons = {
 // Served from cache; refreshed hourly and immediately when an admin saves content.
 export const revalidate = 3600
 
-function getEmbedUrl(url) {
-  if (!url) return ''
-  if (url.includes('youtube.com/watch?v=')) {
-    return `https://www.youtube.com/embed/${url.split('v=')[1].split('&')[0]}`
-  }
-  if (url.includes('youtu.be/')) {
-    return `https://www.youtube.com/embed/${url.split('youtu.be/')[1].split('?')[0]}`
-  }
-  return url
-}
 
 export async function generateStaticParams() {
   const { services } = await getServicesContent()
@@ -103,13 +94,7 @@ export default async function ServiceDetailPage(props) {
                 </div>
               </div>
               <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 aspect-video bg-slate-950">
-                <iframe
-                  src={getEmbedUrl(videoUrl)}
-                  title={`${service.navLabel} video`}
-                  className="h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                <VideoPlayer src={videoUrl} title={`${service.navLabel} video`} />
               </div>
             </section>
           )}

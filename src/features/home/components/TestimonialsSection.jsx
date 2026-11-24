@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import Container from '@/shared/components/ui/Container'
 import SectionHeader from '@/shared/components/ui/SectionHeader'
 import Reveal from '@/shared/components/ui/Reveal'
@@ -31,7 +32,7 @@ export default function TestimonialsSection({ testimonials = testimonialsData })
 
         <div className="grid md:grid-cols-3 gap-6">
           {safeTestimonials.map((t, i) => (
-            <Reveal key={t.id} delay={i * 100}>
+            <Reveal key={`${t.name}-${i}`} delay={i * 100}>
               <div className="group bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/[0.06] rounded-2xl p-7 hover:border-gold-200 dark:hover:border-gold-500/20 hover:shadow-xl hover:shadow-gold-500/5 transition-all duration-300 flex flex-col h-full relative overflow-hidden">
                 {/* Quote mark */}
                 <div className="absolute top-4 right-6 text-6xl font-serif leading-none text-slate-100 dark:text-white/[0.04] select-none pointer-events-none">
@@ -45,8 +46,10 @@ export default function TestimonialsSection({ testimonials = testimonialsData })
                 </blockquote>
 
                 <div className="flex items-center gap-3 pt-5 border-t border-slate-100 dark:border-white/[0.06]">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-navy-900 via-navy-700 to-gold-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                    {t.avatar}
+                  <div className="relative w-10 h-10 overflow-hidden rounded-full bg-gradient-to-br from-navy-900 via-navy-700 to-gold-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                    {t.photo
+                      ? <Image src={t.photo} alt={t.name} fill sizes="40px" className="object-cover" />
+                      : (t.avatar || String(t.name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase())}
                   </div>
                   <div>
                     <p className="text-slate-900 dark:text-white font-semibold text-sm">{t.name}</p>

@@ -139,7 +139,15 @@ export default function BookingsPage() {
                         {editing ? <input value={draft.name || ''} onChange={e => setDraft(v => ({ ...v, name: e.target.value }))} className={inputCls} /> : row.name}
                       </td>
                       <td className="px-4 py-3 text-gray-600 min-w-[130px]">
-                        {editing ? <input value={draft.phone || ''} onChange={e => setDraft(v => ({ ...v, phone: e.target.value }))} className={inputCls} /> : row.phone}
+                        {editing ? <input value={draft.phone || ''} onChange={e => setDraft(v => ({ ...v, phone: e.target.value }))} className={inputCls} /> : (row.phone ? (
+                          <div className="space-y-1">
+                            <div className="font-medium">{row.phone}</div>
+                            <div className="flex gap-1.5">
+                              <a href={`tel:${row.phone}`} className="rounded-md bg-navy-900 px-2 py-0.5 text-[11px] font-semibold text-white hover:bg-navy-800">📞 Call</a>
+                              <a href={`https://wa.me/${String(row.phone).replace(/\D/g, '').replace(/^0/, '880')}`} target="_blank" rel="noopener noreferrer" className="rounded-md bg-[#25D366] px-2 py-0.5 text-[11px] font-semibold text-white hover:opacity-90">WhatsApp</a>
+                            </div>
+                          </div>
+                        ) : '—')}
                       </td>
                       <td className="px-4 py-3 text-gray-600 min-w-[120px]">
                         {editing ? <input value={draft.date || ''} onChange={e => setDraft(v => ({ ...v, date: e.target.value }))} className={inputCls} /> : (row.date || '—')}

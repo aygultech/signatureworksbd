@@ -41,7 +41,7 @@ export default function HeroSection({ slides = heroSlidesData }) {
     return () => clearInterval(t)
   }, [next, paused])
 
-  const slide = safeSlides[current]
+  const slide = safeSlides[current] || safeSlides[0]
 
   return (
     <section
@@ -50,9 +50,9 @@ export default function HeroSection({ slides = heroSlidesData }) {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {heroSlidesData.map((s, i) => (
+      {safeSlides.map((s, i) => (
         <div
-          key={s.id}
+          key={i}
           className={`absolute inset-0 transition-opacity duration-[900ms] ease-in-out ${i === current ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         >
           <div
@@ -129,7 +129,7 @@ export default function HeroSection({ slides = heroSlidesData }) {
               <div className="flex items-center gap-2 rounded-full border border-white/10 bg-slate-900/40 px-3 py-2">
                 {safeSlides.map((s, i) => (
                   <button
-                    key={s.id}
+                    key={i}
                     onClick={() => goTo(i)}
                     aria-label={`Slide ${i + 1}`}
                     className={`rounded-full transition-all duration-500 ${i === current ? 'h-2 w-8 bg-gradient-to-r from-gold-500 to-amber-300' : 'h-2 w-2 bg-white/30 hover:bg-white/60'}`}

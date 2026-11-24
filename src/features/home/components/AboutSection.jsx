@@ -5,8 +5,15 @@ import Reveal from '@/shared/components/ui/Reveal'
 import Button from '@/shared/components/ui/Button'
 import { aboutData } from '@/data'
 
+function initials(name = '') {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
+}
+
 export default function AboutSection({ about = aboutData }) {
   const safeAbout = about && typeof about === 'object' ? about : aboutData
+  const uploaded = (Array.isArray(safeAbout.gallery) ? safeAbout.gallery : []).filter(g => g?.image)
+  // Always four tiles: uploaded photos first, demo photos fill any empty slots.
+  const collage = [...uploaded, ...aboutData.gallery].slice(0, 4)
   return (
     <section id="about" className="py-24 bg-white dark:bg-slate-950">
       <Container>
@@ -49,23 +56,16 @@ export default function AboutSection({ about = aboutData }) {
           <Reveal direction="right">
             <div className="relative">
               <div className="grid grid-cols-2 gap-4">
-                <div className="relative aspect-square">
-                  <Image src="/images/stock/hero-home.jpg" alt="Project" fill sizes="(max-width: 1024px) 50vw, 25vw" className="rounded-2xl object-cover" />
-                </div>
-                <div className="relative aspect-square mt-8">
-                  <Image src="/images/stock/hero-interior.jpg" alt="Interior" fill sizes="(max-width: 1024px) 50vw, 25vw" className="rounded-2xl object-cover" />
-                </div>
-                <div className="relative aspect-square -mt-8">
-                  <Image src="/images/stock/portfolio-office.jpg" alt="Office" fill sizes="(max-width: 1024px) 50vw, 25vw" className="rounded-2xl object-cover" />
-                </div>
-                <div className="relative aspect-square">
-                  <Image src="/images/stock/hero-construction.jpg" alt="Building" fill sizes="(max-width: 1024px) 50vw, 25vw" className="rounded-2xl object-cover" />
-                </div>
+                {collage.map((img, i) => (
+                  <div key={i} className={`relative aspect-square ${['', 'mt-8', '-mt-8', ''][i] || ''}`}>
+                    <Image src={img.image} alt={img.alt || 'Signature Works project'} fill sizes="(max-width: 1024px) 50vw, 25vw" className="rounded-2xl object-cover" />
+                  </div>
+                ))}
               </div>
               {/* Experience badge */}
               <div className="absolute -bottom-5 -left-5 bg-gradient-to-br from-navy-900 via-navy-800 to-gold-500 rounded-2xl p-5 shadow-2xl shadow-navy-950/30">
-                <p className="text-white text-3xl font-black leading-none">8+</p>
-                <p className="text-amber-100 text-sm font-medium mt-1">Years of<br />Excellence</p>
+                <p className="text-white text-3xl font-black leading-none">{safeAbout.badgeNumber || aboutData.badgeNumber}</p>
+                <p className="text-amber-100 text-sm font-medium mt-1">{safeAbout.badgeText || aboutData.badgeText}</p>
               </div>
             </div>
           </Reveal>
@@ -89,10 +89,12 @@ export default function AboutSection({ about = aboutData }) {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {(safeAbout.team || []).map((member, i) => (
-              <Reveal key={member.name} delay={i * 100}>
+              <Reveal key={`${member.name}-${i}`} delay={i * 100}>
                 <div className="group text-center p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/[0.06] hover:border-gold-200 dark:hover:border-gold-500/20 hover:shadow-lg hover:shadow-gold-500/5 transition-all duration-300">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-navy-900 via-navy-700 to-gold-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-navy-950/20 group-hover:scale-110 group-hover:shadow-gold-500/30 transition-all duration-300">
-                    <span className="text-white font-black text-sm">{member.avatar}</span>
+                  <div className="relative w-16 h-16 overflow-hidden rounded-full bg-gradient-to-br from-navy-900 via-navy-700 to-gold-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-navy-950/20 group-hover:scale-110 group-hover:shadow-gold-500/30 transition-all duration-300">
+                    {member.photo
+                      ? <Image src={member.photo} alt={member.name} fill sizes="64px" className="object-cover" />
+                      : <span className="text-white font-black text-sm">{member.avatar || initials(member.name)}</span>}
                   </div>
                   <h4 className="text-slate-900 dark:text-white font-semibold text-sm">{member.name}</h4>
                   <p className="text-gold-600 dark:text-gold-300 text-xs font-medium mt-0.5">{member.role}</p>

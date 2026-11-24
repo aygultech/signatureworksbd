@@ -40,7 +40,7 @@ export default function ServicesSection({ services = servicesData }) {
         {/* Top row: 2 large dark featured cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           {[construction, architecture].map((service, i) => (
-            <Reveal key={service.id} delay={i * 100}>
+            <Reveal key={`${service.title}-${i}`} delay={i * 100}>
               <div className="group relative bg-slate-900 dark:bg-slate-900 border border-white/[0.08] rounded-2xl p-8 overflow-hidden hover:border-gold-500/30 transition-all duration-500 hover:shadow-xl hover:shadow-gold-500/10 min-h-[320px] flex flex-col">
                 {/* Radial glow on hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
